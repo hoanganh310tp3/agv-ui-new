@@ -9,7 +9,7 @@ import { Order } from "@/types/Order.types";
 import { Trash2 } from "lucide-react";
 
 export const columnsTableOrders = (
-  handleClickBtnDelete: (orderId: number) => void,
+  handleClickBtnDelete: (request_id: number) => void,
 ): ColumnDef<Order>[] => [
   {
     id: "select",
@@ -32,13 +32,23 @@ export const columnsTableOrders = (
     ),
   },
   {
-    accessorKey: "order_id",
+    accessorKey: "request_id", // Đổi từ order_id thành request_id
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Order ID" />
+      <DataTableColumnHeader column={column} title="Request ID" />
     ),
     cell: ({ row }) => {
-      const order_id = parseFloat(row.getValue("order_id"));
-      return <div className="font-medium">{order_id}</div>;
+      const request_id = parseFloat(row.getValue("request_id"));
+      return <div className="font-medium">{request_id}</div>;
+    },
+  },
+  {
+    accessorKey: "order_number", // Thêm cột order_number
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Order Number" />
+    ),
+    cell: ({ row }) => {
+      const order_number = row.getValue("order_number");
+      return <div className="font-medium">{order_number}</div>;
     },
   },
   {
@@ -101,15 +111,23 @@ export const columnsTableOrders = (
     id: "actions",
     cell: ({ row }) => {
       const order = row.original;
-
+      
+      // Kiểm tra có request_id không trước khi render nút Delete
+      if (!order.request_id) {
+        return null;
+      }
+  
       return (
         <Button
-          variant={"destructive"}
-          onClick={() => handleClickBtnDelete(order.order_id)}
+          variant="destructive"
+          onClick={() => {
+            console.log("Deleting order:", order); // Debug log
+            handleClickBtnDelete(order.request_id);
+          }}
         >
-          <Trash2 />
+          <Trash2 className="h-4 w-4" />
         </Button>
       );
     },
-  },
+  }
 ];

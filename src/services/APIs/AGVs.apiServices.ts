@@ -1,7 +1,7 @@
 import { AGV, CreateAgvDto } from "@/types/AGV.types";
 import api from "@/utils/axiosCustomize";
 
-const AGVS_URL = "/agvs";
+const AGVS_URL = "/agv_identify";
 
 const getAGVs = async (): Promise<AGV[]> => {
   try {

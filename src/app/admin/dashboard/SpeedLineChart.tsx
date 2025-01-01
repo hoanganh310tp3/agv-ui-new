@@ -27,39 +27,49 @@ export function SpeedLineChart({ agvDataArray }: SpeedLineChartProps) {
 
     // Dynamically build chart configuration
     const newConfig: ChartConfig = {};
-    const newChartData = agvDataArray.map((agv) => {
+    const newDataPoints = agvDataArray.map((agv) => {
       const key = `agv${agv.car_id}`;
+      
+      // Configure color and label for each AGV if not already set
       if (!newConfig[key]) {
         newConfig[key] = {
           label: `AGV ${agv.car_id}`,
-          color: `hsl(var(--chart-${agv.car_id % 12}))`, // Cycle colors for multiple AGVs
+          color: `hsl(${(agv.car_id * 100) % 360}, 70%, 50%)`, // Generate unique color
         };
       }
+
       return {
-        timestamp: new Date(agv.time_stamp).toLocaleTimeString(),
+        timestamp: agv.time_stamp,
         time: new Date(agv.time_stamp).getTime(),
         [key]: agv.agv_speed,
       };
     });
 
-    setChartConfig((prevConfig) => ({ ...prevConfig, ...newConfig }));
-
+    // Update chart data while maintaining time window
     setChartData((prevData) => {
+      const now = Date.now();
+      const timeWindow = 5000; // 5 seconds window
+
+      // Combine existing and new data points
       const mergedData = [...prevData];
-      newChartData.forEach((newDataPoint) => {
-        const existingDataPoint = mergedData.find(
-          (dataPoint) => dataPoint.timestamp === newDataPoint.timestamp,
+      newDataPoints.forEach((newPoint) => {
+        const existingIndex = mergedData.findIndex(
+          (point) => point.time === newPoint.time
         );
-        if (existingDataPoint) {
-          Object.assign(existingDataPoint, newDataPoint);
+        if (existingIndex >= 0) {
+          mergedData[existingIndex] = { ...mergedData[existingIndex], ...newPoint };
         } else {
-          mergedData.push(newDataPoint);
+          mergedData.push(newPoint);
         }
       });
 
-      const now = Date.now();
-      return mergedData.filter((dataPoint) => now - dataPoint.time <= 5000);
+      // Filter data points within time window and sort by time
+      return mergedData
+        .filter((point) => now - point.time <= timeWindow)
+        .sort((a, b) => a.time - b.time);
     });
+
+    setChartConfig(newConfig);
   }, [agvDataArray]);
 
   return (
@@ -70,21 +80,14 @@ export function SpeedLineChart({ agvDataArray }: SpeedLineChartProps) {
       <CardContent>
         <ChartContainer config={chartConfig} className="max-h-72 w-full">
           <LineChart
-            accessibilityLayer
             data={chartData}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
+            margin={{ left: 12, right: 12, top: 12, bottom: 12 }}
           >
-            <CartesianGrid />
+            <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="timestamp"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
+              tickFormatter={(value) => new Date(value).toLocaleTimeString()}
             />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
             {Object.keys(chartConfig).map((key) => (
               <Line
                 key={key}
@@ -93,6 +96,7 @@ export function SpeedLineChart({ agvDataArray }: SpeedLineChartProps) {
                 stroke={chartConfig[key].color}
                 strokeWidth={2}
                 dot={false}
+                isAnimationActive={false} // Disable animation for real-time updates
               />
             ))}
           </LineChart>

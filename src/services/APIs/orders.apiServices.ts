@@ -1,4 +1,5 @@
 import { CreateOrderDto, Order } from "@/types/Order.types";
+import axiosCustomize from "@/utils/axiosCustomize";
 import api from "@/utils/axiosCustomize";
 
 const ORDERS_URL = "orders/";
@@ -28,7 +29,7 @@ const updateOrder = async (
   order: CreateOrderDto,
 ): Promise<Order> => {
   try {
-    const { data } = await api.put(`${ORDERS_URL}${order_id}/`, order); // ORDERS_URL already had a slash at the end
+    const { data } = await api.put(`${ORDERS_URL}${request_id}/`, order); // ORDERS_URL already had a slash at the end
     return data;
   } catch (error) {
     console.error(">>> Error updating order:", error);
@@ -36,12 +37,14 @@ const updateOrder = async (
   }
 };
 
-const deleteOrder = async (order_id: number) => {
+const deleteOrder = async (request_id: number) => {
   try {
-    await api.delete(`${ORDERS_URL}${order_id}/`); // ORDERS_URL already had a slash at the end
+    // Sử dụng endpoint orders/ với query param request_id
+    const { data } = await axiosCustomize.delete(`${ORDERS_URL}${request_id}/`); 
+    return data;
   } catch (error) {
-    console.error(">>> Error deleting order:", error);
-    throw new Error(">>> Failed to delete order");
+    console.error("Error in deleteOrder API call:", error);
+    throw error;
   }
 };
 

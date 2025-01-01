@@ -1,5 +1,6 @@
 "use client";
 
+import { MapDrawer } from "@/app/layout/MapDrawer";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -134,7 +135,6 @@ export function DialogFormCreateOrders({
 }: FormCreateOrdersProps) {
   const { toast } = useToast();
   const { account } = useAuth();
-
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -417,9 +417,12 @@ export function DialogFormCreateOrders({
                 )}
               />
             </div>
-            <Button type="submit" disabled={!form.formState.isValid}>
-              Submit
-            </Button>
+            <div className="space-x-5">
+              <Button type="submit" disabled={!form.formState.isValid}>
+                Submit
+              </Button>
+              <MapDrawer />
+            </div>
           </form>
         </Form>
       </DialogContent>

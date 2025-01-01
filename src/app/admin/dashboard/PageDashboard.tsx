@@ -7,34 +7,56 @@ import { columnsTableDashboard } from "./columnsTableDashboard";
 import { SpeedLineChart } from "./SpeedLineChart";
 
 export function PageDashboard() {
-  const [agvDataMap, setAgvDataMap] = useState<Record<number, WebSocketData>>(
-    {},
-  );
-  const [paused, setPaused] = useState(false); // New paused state
+  const [agvDataMap, setAgvDataMap] = useState<Record<number, WebSocketData>>({});
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8000/ws/data/");
+    const ws = new WebSocket("ws://localhost:8000/ws/agv_data/");
+
+    ws.onopen = () => {
+      console.log("Connected to AGV data websocket");
+      ws.send("get_data");
+    };
 
     ws.onmessage = (event) => {
-      if (paused) return; // Skip updates if paused
+      if (paused) return;
 
-      const data = JSON.parse(event.data);
-
-      if (data.agvs_array_data) {
-        setAgvDataMap((prevData) => {
-          const updatedData = { ...prevData };
-          data.agvs_array_data.forEach((agv: WebSocketData) => {
-            updatedData[agv.car_id] = agv; // Update or add AGV data based on car_id
+      try {
+        const data = JSON.parse(event.data);
+        if (Array.isArray(data)) {
+          const newAgvDataMap: Record<number, WebSocketData> = {};
+          data.forEach((item) => {
+            newAgvDataMap[item.car_id] = {
+              car_id: item.car_id,
+              agv_state: item.agv_state,
+              agv_speed: item.agv_speed,
+              agv_battery: item.agv_battery,
+              previous_waypoint: item.previous_waypoint,
+              next_waypoint: item.next_waypoint,
+              time_stamp: item.time_stamp,
+              distance_sum: item.distance_sum,
+              distance: item.distance,
+            };
           });
-          return updatedData;
-        });
+          setAgvDataMap(newAgvDataMap);
+        }
+      } catch (error) {
+        console.error("Error parsing websocket data:", error);
       }
+    };
+
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket connection closed");
     };
 
     return () => {
       ws.close();
     };
-  }, [paused]); // Re-run effect if paused changes
+  }, [paused]);
 
   const agvDataArray = Object.values(agvDataMap);
 

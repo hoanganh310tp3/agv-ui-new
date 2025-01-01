@@ -23,13 +23,18 @@ export function PageOrders() {
     setListData(data);
   };
 
-  const handleClickBtnDelete = async (order_id: number) => {
-    console.log(">>> delete order with id: ", order_id);
-
+  const handleClickBtnDelete = async (request_id: number) => {
+    console.log(">>> Deleting order with request_id:", request_id);
+    
+    if (!request_id) {
+      toast.error("Invalid request ID");
+      return;
+    }
+  
     try {
-      await deleteOrder(order_id);
-      toast.success("Delete order successfully");
-      await fetchListData();
+      await deleteOrder(request_id);
+      toast.success("Order deleted successfully");
+      await fetchListData(); // Refresh data after deletion
     } catch (error) {
       console.error("Failed to delete order:", error);
       toast.error("Failed to delete order. Please try again.");

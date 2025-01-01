@@ -16,7 +16,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { doLogout } from "@/redux/userSlice";
-import { postLogout } from "@/services/APIs/auth.apiServices";
+import { postLogout, getCurrentUser } from "@/services/APIs/auth.apiServices";
 import { ChevronsUpDown, LogOut } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -29,7 +29,6 @@ export function NavUser({
   account: {
     name: string;
     email: string;
-    refresh_token: string;
   };
 }) {
   const { isMobile } = useSidebar();
@@ -37,26 +36,23 @@ export function NavUser({
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const logoutInfo = {
-    email: account.email,
-    refresh_token: account.refresh_token,
-  };
-
-  const handleLogOut = async () => {
+  const handleLogout = async () => {
     try {
-      const data: { message?: string; detail?: string } | void =
-        await postLogout(logoutInfo);
-      if (data && data.message) {
-        dispatch(doLogout());
-        localStorage.removeItem("access_token");
-        navigate("/login");
-        toast.success(data.message);
-      } else {
-        toast.error(data.detail);
-      }
+      const logoutInfo = {
+        email: account.email,
+        refresh_token: localStorage.getItem('refresh_token')
+      };
+
+      const data = await postLogout(logoutInfo);
+      
+      dispatch(doLogout());
+      navigate("/login");
+      toast.success(data.message || "Logged out successfully");
     } catch (error) {
-      toast.error("Error, cannot log out");
       console.error("Error logging out:", error);
+      dispatch(doLogout());
+      navigate("/login");
+      toast.error("Logged out with errors");
     }
   };
 
@@ -107,7 +103,7 @@ export function NavUser({
               <Button
                 variant={"destructive"}
                 className="w-full"
-                onClick={() => handleLogOut()}
+                onClick={handleLogout}
               >
                 <LogOut />
                 Log out

@@ -38,9 +38,9 @@ export const columnsTableSchedules: ColumnDef<Schedule>[] = [
     },
   },
   {
-    accessorKey: "order_id",
+    accessorKey: "order_number",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Order ID" />
+      <DataTableColumnHeader column={column} title="Order Number" />
     ),
   },
   {

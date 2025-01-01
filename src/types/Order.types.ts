@@ -2,8 +2,8 @@ import { format } from "date-fns";
 import { z } from "zod";
 
 export const CreateOrderZod = z.object({
-  order_id: z.preprocess(
-    (order_id) => parseInt(order_id as string, 10),
+  order_number: z.preprocess( // Đổi từ order_id thành order_number
+    (order_number) => parseInt(order_number as string, 10),
     z.number(),
   ),
   load_name: z.string(),
@@ -33,14 +33,18 @@ export const CreateOrderZod = z.object({
 
 export type CreateOrderDto = z.infer<typeof CreateOrderZod>;
 
-export interface Order {
-  order_id: number;
+export interface CreateOrderDto {
+  order_number: number; // Đổi từ order_id thành order_number
   order_date: string;
-  start_time: string;
-  start_point: number;
-  end_point: number;
   load_name: string;
   load_amount: number;
   load_weight: number;
+  start_time: string;
+  start_point: number;
+  end_point: number;
   user_name: string;
+}
+
+export interface Order extends CreateOrderDto {
+  request_id: number; // Thêm request_id từ database
 }

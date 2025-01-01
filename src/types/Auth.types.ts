@@ -8,25 +8,23 @@ export const CreateLoginZod = z.object({
 export type CreateLoginDto = z.infer<typeof CreateLoginZod>;
 
 export interface LoginResponse {
-  message: string;
-  email: string;
-  name: string;
   access_token: string;
   refresh_token: string;
-}
-
-export const CreateRegisterZod = z.object({
-  email: z.string(),
-  password: z.string(),
-  name: z.string(),
-});
-
-export type CreateRegisterDto = z.infer<typeof CreateRegisterZod>;
-
-export interface RegisterResponse {
   email: string;
   name: string;
+  message: string;
+}
+
+export interface CreateRegisterDto {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface RegisterResponse {
   id: number;
+  name: string;
+  email: string;
 }
 
 export const CreateLogoutZod = z.object({

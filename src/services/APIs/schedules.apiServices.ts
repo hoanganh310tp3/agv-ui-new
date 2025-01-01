@@ -13,4 +13,17 @@ const getSchedules = async (): Promise<Schedule[]> => {
   }
 };
 
-export { getSchedules };
+const createSchedule = async (): Promise<void> => {
+  try {
+    const { data } = await api.get(`/requests_management/schedule/`);
+    return data;
+  } catch (error) {
+    console.error(">>> Error creating schedule:", error);
+    throw new Error(">>> Failed to create schedule");
+  }
+};
+
+export { getSchedules, createSchedule };
+
+
+

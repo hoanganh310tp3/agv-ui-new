@@ -1,40 +1,16 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { ModeToggle } from "@/components/mode-toggle";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { useEffect, useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import { LayoutBreadcrumb } from "./layout/LayoutBreadcrumb";
+import { MapDrawer } from "./layout/MapDrawer";
 
 export default function Layout() {
-  const location = useLocation(); // Get the current location
-  const [currentUrl, setCurrentUrl] = useState(window.location.href);
-
-  useEffect(() => {
-    // Update the URL whenever location changes
-    setCurrentUrl(window.location.href);
-  }, [location]);
-
-  const [protocol, rest] = currentUrl.split("//");
-  const [host, ...pathParts] = rest.split("/");
-  const path = pathParts.join("/");
-  const coloredPath = (
-    <span className="bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text font-semibold text-transparent">
-      {path}
-    </span>
-  );
-
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -45,19 +21,8 @@ export default function Layout() {
             <Separator orientation="vertical" className="mr-2 h-4" />
             <ModeToggle />
             <Separator orientation="vertical" className="mr-2 h-4" />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/">AGV System</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>
-                    {protocol}//{host}/{coloredPath}
-                  </BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
+            <MapDrawer />
+            <LayoutBreadcrumb />
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
