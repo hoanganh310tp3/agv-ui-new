@@ -44,9 +44,9 @@ export const columnsTableAGVs = (
     ),
   },
   {
-    accessorKey: "max_battery",
+    accessorKey: "battery_capacity",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Max Battery" />
+      <DataTableColumnHeader column={column} title="Battery" />
     ),
   },
   {

@@ -32,7 +32,7 @@ export const columnsTableOrders = (
     ),
   },
   {
-    accessorKey: "request_id", // Đổi từ order_id thành request_id
+    accessorKey: "request_id",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Request ID" />
     ),
@@ -42,12 +42,12 @@ export const columnsTableOrders = (
     },
   },
   {
-    accessorKey: "order_number", // Thêm cột order_number
+    accessorKey: "order_number",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Order Number" />
     ),
     cell: ({ row }) => {
-      const order_number = row.getValue("order_number");
+      const order_number = parseFloat(row.getValue("order_number"));
       return <div className="font-medium">{order_number}</div>;
     },
   },

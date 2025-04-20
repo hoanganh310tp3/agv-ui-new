@@ -39,17 +39,14 @@ export function PageSchedules() {
     <div>
       <div className="space-y-5">
         <h2 className="text-3xl font-bold">Schedules</h2>
-        <div className="space-x-4">
-          <Button onClick={fetchListData}>Fetch Schedules</Button>
-          <Button 
-            onClick={handleCreateSchedule} 
-            disabled={isCreating}
-            variant="secondary"
-          >
-            <CalendarPlus className="mr-2 h-4 w-4" />
-            {isCreating ? "Creating Schedule..." : "Create Schedule"}
-          </Button>
-        </div>
+        <Button 
+          onClick={handleCreateSchedule} 
+          disabled={isCreating}
+          variant="secondary"
+        >
+          <CalendarPlus className="mr-2 h-4 w-4" />
+          {isCreating ? "Creating Schedule..." : "Create Schedule"}
+        </Button>
         <DataTable
           data={listData}
           columns={columnsTableSchedules}

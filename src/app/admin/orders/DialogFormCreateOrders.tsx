@@ -72,7 +72,7 @@ const weightMapping: { [key: string]: number } = loadNames.reduce(
 );
 
 const formSchema = z.object({
-  order_id: z
+  order_number: z
     .string()
     .min(1)
     .regex(/^\d+$/, { message: "Must be integer" })
@@ -139,7 +139,7 @@ export function DialogFormCreateOrders({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      order_id: "",
+      order_number: "",
       order_date: new Date(),
       start_time: "",
       start_point: "",
@@ -154,7 +154,7 @@ export function DialogFormCreateOrders({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const createDto: CreateOrderDto = {
-      order_id: convertStringToNumber(values.order_id),
+      order_number: convertStringToNumber(values.order_number),
       order_date: convertDateToString(values.order_date),
       start_time: values.start_time,
       start_point: convertStringToNumber(values.start_point),
@@ -225,10 +225,10 @@ export function DialogFormCreateOrders({
             <div className="grid gap-4 md:grid-cols-4">
               <FormField
                 control={form.control}
-                name="order_id"
+                name="order_number"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Order ID</FormLabel>
+                    <FormLabel>Order Number</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Enter integer from 1 to 999"
@@ -236,7 +236,7 @@ export function DialogFormCreateOrders({
                       />
                     </FormControl>
                     <FormDescription>
-                      Unique ID you assign to this order.
+                      Unique number you assign to this order.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

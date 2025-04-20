@@ -22,7 +22,7 @@ export type CreateAgvDto = z.infer<typeof CreateAgvZod>;
 export interface AGV {
   agv_id: number;
   guidance_type: string;
-  max_battery: number;
+  battery_capacity: number;
   max_load: number;
   max_speed: number;
   is_connected: boolean;

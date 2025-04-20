@@ -2,11 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useEffect, useState } from "react";
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis, Tooltip, Legend } from "recharts";
 
 interface SpeedLineChartProps {
   agvDataArray: {
@@ -17,60 +15,62 @@ interface SpeedLineChartProps {
 }
 
 export function SpeedLineChart({ agvDataArray }: SpeedLineChartProps) {
-  const [chartData, setChartData] = useState<
-    { timestamp: string; time: number; [key: string]: number | string }[]
-  >([]);
+  const [chartData, setChartData] = useState<any[]>([]);
   const [chartConfig, setChartConfig] = useState<ChartConfig>({});
 
+  // Tạo dữ liệu lịch sử để vẽ đồ thị
   useEffect(() => {
-    if (agvDataArray.length === 0) return;
+    if (!agvDataArray.length) return;
 
-    // Dynamically build chart configuration
+    // Tạo cấu hình chart cho mỗi AGV
     const newConfig: ChartConfig = {};
-    const newDataPoints = agvDataArray.map((agv) => {
+    agvDataArray.forEach(agv => {
       const key = `agv${agv.car_id}`;
-      
-      // Configure color and label for each AGV if not already set
-      if (!newConfig[key]) {
-        newConfig[key] = {
-          label: `AGV ${agv.car_id}`,
-          color: `hsl(${(agv.car_id * 100) % 360}, 70%, 50%)`, // Generate unique color
-        };
-      }
-
-      return {
-        timestamp: agv.time_stamp,
-        time: new Date(agv.time_stamp).getTime(),
-        [key]: agv.agv_speed,
+      newConfig[key] = {
+        label: `AGV ${agv.car_id}`,
+        color: `hsl(${(agv.car_id * 100) % 360}, 70%, 50%)`,
       };
     });
-
-    // Update chart data while maintaining time window
-    setChartData((prevData) => {
-      const now = Date.now();
-      const timeWindow = 5000; // 5 seconds window
-
-      // Combine existing and new data points
-      const mergedData = [...prevData];
-      newDataPoints.forEach((newPoint) => {
-        const existingIndex = mergedData.findIndex(
-          (point) => point.time === newPoint.time
-        );
-        if (existingIndex >= 0) {
-          mergedData[existingIndex] = { ...mergedData[existingIndex], ...newPoint };
-        } else {
-          mergedData.push(newPoint);
-        }
-      });
-
-      // Filter data points within time window and sort by time
-      return mergedData
-        .filter((point) => now - point.time <= timeWindow)
-        .sort((a, b) => a.time - b.time);
-    });
-
     setChartConfig(newConfig);
+
+    // Bây giờ thêm dữ liệu hiện tại vào chart
+    setChartData(prevData => {
+      // Tạo điểm dữ liệu mới với timestamp hiện tại
+      const now = new Date().toISOString();
+      const newPoint: any = { 
+        timestamp: now,
+        formattedTime: new Date().toLocaleTimeString()
+      };
+      
+      // Thêm dữ liệu của mỗi AGV vào điểm dữ liệu
+      agvDataArray.forEach(agv => {
+        newPoint[`agv${agv.car_id}`] = agv.agv_speed;
+      });
+      
+      // Thêm điểm mới vào dữ liệu trước đó
+      const updatedData = [...prevData, newPoint];
+      
+      // Giới hạn số lượng điểm dữ liệu (giữ 20 điểm gần nhất)
+      if (updatedData.length > 20) {
+        return updatedData.slice(updatedData.length - 20);
+      }
+      
+      return updatedData;
+    });
   }, [agvDataArray]);
+
+  if (agvDataArray.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Speed Line Chart - Multiple AGVs</CardTitle>
+        </CardHeader>
+        <CardContent className="h-72 flex items-center justify-center">
+          <p className="text-muted-foreground">Waiting for AGV data...</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -84,19 +84,27 @@ export function SpeedLineChart({ agvDataArray }: SpeedLineChartProps) {
             margin={{ left: 12, right: 12, top: 12, bottom: 12 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="timestamp"
-              tickFormatter={(value) => new Date(value).toLocaleTimeString()}
+            <XAxis 
+              dataKey="formattedTime" 
+              padding={{ left: 10, right: 10 }}
             />
+            <YAxis 
+              domain={[0, 'auto']}
+              label={{ value: 'Speed (m/s)', angle: -90, position: 'insideLeft' }}
+            />
+            <Tooltip />
+            <Legend />
             {Object.keys(chartConfig).map((key) => (
               <Line
                 key={key}
                 dataKey={key}
+                name={chartConfig[key].label}
                 type="monotone"
                 stroke={chartConfig[key].color}
                 strokeWidth={2}
-                dot={false}
-                isAnimationActive={false} // Disable animation for real-time updates
+                dot={{ r: 3 }}
+                activeDot={{ r: 5 }}
+                isAnimationActive={false}
               />
             ))}
           </LineChart>
